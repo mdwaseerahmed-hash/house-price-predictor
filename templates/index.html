@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0d0f14;
+            --surface: #151820;
+            --surface2: #1c2030;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.15);
+            --accent: #5b8df6;
+            --accent-glow: rgba(91,141,246,0.15);
+            --text: #eef0f6;
+            --muted: #6b7280;
+            --success: #34d399;
+            --label: #9ca3af;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background-image:
+                radial-gradient(ellipse 60% 50% at 70% 10%, rgba(91,141,246,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 10% 80%, rgba(52,211,153,0.05) 0%, transparent 60%);
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 680px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(91,141,246,0.25);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 100px;
+            margin-bottom: 18px;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.4rem;
+            font-weight: 400;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #eef0f6 0%, #9ca3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px;
+            animation: fadeUp 0.6s ease 0.1s both;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--label);
+            letter-spacing: 0.02em;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .field-hint {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            background: rgba(91,141,246,0.05);
+            box-shadow: 0 0 0 3px rgba(91,141,246,0.1);
+        }
+
+        input[type="number"]::placeholder { color: #3d4452; }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0 0 28px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.01em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0);
+            transition: background 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(91,141,246,0.35); }
+        .btn:active { transform: translateY(0); }
+
+        .result-box {
+            margin-top: 24px;
+            background: linear-gradient(135deg, rgba(52,211,153,0.08) 0%, rgba(91,141,246,0.08) 100%);
+            border: 1px solid rgba(52,211,153,0.2);
+            border-radius: 14px;
+            padding: 28px;
+            text-align: center;
+            animation: resultReveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        .result-label {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+
+        .result-price {
+            font-family: 'DM Serif Display', serif;
+            font-size: 3rem;
+            font-weight: 400;
+            background: linear-gradient(135deg, #34d399 0%, #5b8df6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .result-note {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .error-box {
+            margin-top: 24px;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 14px;
+            padding: 18px 20px;
+            color: #f87171;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeUp 0.3s ease both;
+        }
+
+        .error-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            background: rgba(239,68,68,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 12px;
+            color: var(--muted);
+            animation: fadeUp 0.6s ease 0.2s both;
+        }
+
+        .footer span { color: var(--accent); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes resultReveal {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @media (max-width: 520px) {
+            .grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.9rem; }
+            .result-price { font-size: 2.2rem; }
+            .card { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+
+        <div class="header">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                XGBoost Model · R² 0.848
+            </div>
+            <h1>House Price Predictor</h1>
+            <p class="subtitle">Enter block-level details to estimate the median house value<br>in a California neighborhood.</p>
+        </div>
+
+        <div class="card">
+            <form action="/predict" method="POST">
+
+                <p class="section-title">Neighborhood Info</p>
+                <div class="grid">
+                    <div class="field">
+                        <label>Median Income</label>
+                        <div class="input-wrap">
+                            <input type="number" name="MedInc" step="0.01" placeholder="3.50" required>
+                            <span class="field-hint">×$10k</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>House Age (years)</label>
+                        <div class="input-wrap">
+                            <input type="number" name="HouseAge" step="0.1" placeholder="20" required>
+                            <span class="field-hint">yrs</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Avg Rooms</label>
+                        <div class="input-wrap">
+                            <input type="number" name="AveRooms" step="0.01" placeholder="5.20" required>
+                            <span class="field-hint">per house</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Avg Bedrooms</label>
+                        <div class="input-wrap">
+                            <input type="number" name="AveBedrms" step="0.01" placeholder="1.10" required>
+                            <span class="field-hint">per house</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <p class="section-title">Block Demographics</p>
+                <div class="grid">
+                    <div class="field">
+                        <label>Population</label>
+                        <div class="input-wrap">
+                            <input type="number" name="Population" step="1" placeholder="1200" required>
+                            <span class="field-hint">people</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Avg Occupancy</label>
+                        <div class="input-wrap">
+                            <input type="number" name="AveOccup" step="0.01" placeholder="3.10" required>
+                            <span class="field-hint">per house</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <p class="section-title">Location</p>
+                <div class="grid">
+                    <div class="field">
+                        <label>Latitude</label>
+                        <div class="input-wrap">
+                            <input type="number" name="Latitude" step="0.0001" placeholder="34.0500" required>
+                            <span class="field-hint">32–42°N</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Longitude</label>
+                        <div class="input-wrap">
+                            <input type="number" name="Longitude" step="0.0001" placeholder="-118.2400" required>
+                            <span class="field-hint">-124 – -114°</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Predict House Price →</button>
+
+            </form>
+
+            {% if prediction %}
+            <div class="result-box">
+                <p class="result-label">✦ Estimated Value</p>
+                <div class="result-price">${{ "{:,.0f}".format(prediction) }}</div>
+                <p class="result-note">Median house value · California Housing Dataset</p>
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="error-box">
+                <div class="error-icon">!</div>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <p class="footer">Built with <span>XGBoost + Flask</span> · California Housing Dataset</p>
+
+    </div>
+</body>
+</html>
